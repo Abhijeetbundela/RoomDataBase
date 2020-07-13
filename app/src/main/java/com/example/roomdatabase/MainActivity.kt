@@ -1,4 +1,4 @@
-package com.example.roomdatabasekotlin
+package com.example.roomdatabase
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
