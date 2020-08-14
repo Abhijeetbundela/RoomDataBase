@@ -18,7 +18,6 @@ class DataVM(application: Application) : AndroidViewModel(application) {
     val data: LiveData<List<Data>>
     private var job = Job()
     private val coroutineContext: CoroutineContext get() = job + Dispatchers.Main
-    private val scope = CoroutineScope(coroutineContext)
 
     init {
         val dataDao = AppDatabase.getDatabase(application).dataDao()
@@ -26,16 +25,15 @@ class DataVM(application: Application) : AndroidViewModel(application) {
         data = dataRepository.items
     }
 
-    fun insert(data: Data) = scope.launch(Dispatchers.IO) {
+    fun insert(data: Data) = CoroutineScope(coroutineContext).launch(Dispatchers.IO) {
         dataRepository.insert(data)
     }
 
-    fun delete(data: Data) = scope.launch(Dispatchers.IO) {
+    fun delete(data: Data) = CoroutineScope(coroutineContext).launch(Dispatchers.IO) {
         dataRepository.delete(data)
     }
 
-
-    fun update(data: Data) = scope.launch(Dispatchers.IO) {
+    fun update(data: Data) = CoroutineScope(coroutineContext).launch(Dispatchers.IO) {
         dataRepository.update(data)
     }
 
