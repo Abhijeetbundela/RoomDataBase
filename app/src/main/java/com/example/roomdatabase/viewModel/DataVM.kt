@@ -37,6 +37,10 @@ class DataVM(application: Application) : AndroidViewModel(application) {
         dataRepository.update(data)
     }
 
+    fun deleteAll() = CoroutineScope(coroutineContext).launch(Dispatchers.IO) {
+        dataRepository.deleteAll()
+    }
+
     override fun onCleared() {
         super.onCleared()
         job.cancel()

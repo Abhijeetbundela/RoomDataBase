@@ -2,4 +2,6 @@
     <string name="app_name">RoomDataBase</string>
     <string name="title">Title</string>
     <string name="detail">Detail</string>
+    <string name="delete_all">Delete All</string>
+    <string name="change_layout">Change Layout</string>
 </resources>

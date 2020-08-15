@@ -1,14 +1,18 @@
 package com.example.roomdatabase.activities
 
+import android.content.SharedPreferences
+import android.content.SharedPreferences.Editor
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.example.roomdatabase.R
 import com.example.roomdatabase.adapter.DataAdapter
 import com.example.roomdatabase.model.Data
@@ -18,6 +22,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 import java.text.SimpleDateFormat
 import java.util.*
 
+
 class MainActivity : AppCompatActivity(), DataAdapter.AdapterCallback {
 
     private val dataList by lazy { ArrayList<Data>() }
@@ -26,12 +31,18 @@ class MainActivity : AppCompatActivity(), DataAdapter.AdapterCallback {
 
     private val dataViewModel by lazy { ViewModelProvider(this).get(DataVM::class.java) }
 
+    private lateinit var localMenu: Menu
+
+    private lateinit var sharedPreferences: SharedPreferences
+    private lateinit var editor: Editor
+    private var isGrid = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        data_recycler_view.layoutManager = LinearLayoutManager(this@MainActivity)
-        data_recycler_view.adapter = dataAdapter
+        sharedPreferences = getSharedPreferences("prefs", MODE_PRIVATE)
+        editor = sharedPreferences.edit()
 
         create_btn.setOnClickListener {
             addData()
@@ -40,6 +51,24 @@ class MainActivity : AppCompatActivity(), DataAdapter.AdapterCallback {
         dataViewModel.data.observe(this, androidx.lifecycle.Observer {
             dataAdapter.addItem(it)
         })
+
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        isGrid = sharedPreferences.getBoolean("isGrid", false)
+
+        if (isGrid) {
+            data_recycler_view.layoutManager = StaggeredGridLayoutManager(
+                2,
+                StaggeredGridLayoutManager.VERTICAL
+            )
+        } else {
+            data_recycler_view.layoutManager = LinearLayoutManager(this@MainActivity)
+        }
+
+        data_recycler_view.adapter = dataAdapter
 
     }
 
@@ -135,7 +164,7 @@ class MainActivity : AppCompatActivity(), DataAdapter.AdapterCallback {
                 val detail: String =
                     detailInput.editText!!.text.toString().trim()
 
-                val sdf = SimpleDateFormat("dd-MM-yyyy hh:mm a")
+                val sdf = SimpleDateFormat("dd-MM-yyyy hh:mm a", Locale.US)
                 val currentDate = sdf.format(Date())
 
                 when {
@@ -171,7 +200,8 @@ class MainActivity : AppCompatActivity(), DataAdapter.AdapterCallback {
         val builder =
             AlertDialog.Builder(this)
 
-        builder.setCancelable(false).setTitle("Delete Data").setMessage("Are you sure you want to delete ?")
+        builder.setCancelable(false).setTitle("Delete Data")
+            .setMessage("Are you sure you want to delete ?")
 
         builder.setPositiveButton(
             "Delete"
@@ -190,7 +220,78 @@ class MainActivity : AppCompatActivity(), DataAdapter.AdapterCallback {
 
         alertDialog.getButton(AlertDialog.BUTTON_NEGATIVE)
             .setOnClickListener { alertDialog.dismiss() }
+    }
 
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        localMenu = menu!!
+        menuInflater.inflate(R.menu.menu, menu)
+
+        if(isGrid){
+            localMenu.findItem(R.id.change_layout).setIcon(R.drawable.ic_baseline_view_stream);
+        }
+        else{
+            localMenu.findItem(R.id.change_layout).setIcon(R.drawable.ic_baseline_dashboard);
+        }
+
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+
+            R.id.delete_all -> {
+                deleteAll()
+                return true
+            }
+
+            R.id.change_layout -> {
+                isGrid = !isGrid
+
+                if (isGrid) {
+                    localMenu.findItem(R.id.change_layout)
+                        .setIcon(R.drawable.ic_baseline_view_stream);
+                } else {
+                    localMenu.findItem(R.id.change_layout)
+                        .setIcon(R.drawable.ic_baseline_dashboard);
+                }
+                editor.putBoolean("isGrid", isGrid)
+                editor.apply()
+                onResume()
+
+                return true
+            }
+
+            else -> super.onOptionsItemSelected(item)
+        }
+
+    }
+
+    private fun deleteAll() {
+
+        val builder =
+            AlertDialog.Builder(this)
+
+        builder.setCancelable(false).setTitle("Delete All Data")
+            .setMessage("Are you sure you want to delete all data?")
+
+        builder.setPositiveButton(
+            "Delete"
+        ) { _, _ -> }.setNegativeButton(
+            "Cancel"
+        ) { _, _ -> }
+
+        val alertDialog = builder.create()
+        alertDialog.show()
+
+        alertDialog.getButton(AlertDialog.BUTTON_POSITIVE)
+            .setOnClickListener {
+
+                dataViewModel.deleteAll()
+                alertDialog.dismiss()
+            }
+
+        alertDialog.getButton(AlertDialog.BUTTON_NEGATIVE)
+            .setOnClickListener { alertDialog.dismiss() }
 
     }
 }

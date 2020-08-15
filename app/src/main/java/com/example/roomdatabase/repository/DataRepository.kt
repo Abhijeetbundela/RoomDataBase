@@ -23,4 +23,9 @@ class DataRepository(private val dataDao: DataDao) {
     suspend fun delete(todo: Data) {
         dataDao.delete(todo)
     }
+
+    @WorkerThread
+    fun deleteAll() {
+        dataDao.deleteAll()
+    }
 }

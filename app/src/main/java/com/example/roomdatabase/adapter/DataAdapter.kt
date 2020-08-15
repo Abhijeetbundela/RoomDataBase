@@ -1,13 +1,19 @@
 package com.example.roomdatabase.adapter
 
+import android.graphics.Color
+import android.graphics.drawable.GradientDrawable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
-import androidx.appcompat.app.AlertDialog
+import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.TextView
+import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.roomdatabase.R
 import com.example.roomdatabase.model.Data
+import java.util.*
+
 
 class DataAdapter(
     private var items: List<Data>,
@@ -52,6 +58,16 @@ class DataAdapter(
             }
         }
 
+//        val r = Random()
+//        val red: Int = r.nextInt(255 - 0 + 1) + 0
+//        val green: Int = r.nextInt(255 - 0 + 1) + 0
+//        val blue: Int = r.nextInt(255 - 0 + 1) + 0
+//
+//        val draw = GradientDrawable()
+//        draw.shape = GradientDrawable.RECTANGLE
+//        draw.setColor(Color.rgb(red, green, blue))
+//        holder.cardView.background = draw
+
 
         holder.updateButton.setOnClickListener {
             callback.update(data)
@@ -88,5 +104,6 @@ class DataAdapter(
         val editLayout: LinearLayout = itemView.findViewById(R.id.edit_layout)
         val arrowBtn: ImageView = itemView.findViewById(R.id.arrow_btn)
         val view: View = itemView.findViewById(R.id.view)
+        val cardView: CardView = itemView.findViewById(R.id.card_view)
     }
 }
